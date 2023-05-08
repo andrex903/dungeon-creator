@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.IO;
 using RedeevEditor.Utilities;
 using UnityEditor;
 using UnityEngine;
@@ -26,7 +27,7 @@ namespace RedeevEditor.DungeonCreator
             get
             {
                 if (SceneData.checkConnections) return rooms;
-                return SceneData.placeholders;
+                return SceneData.prefabs;
             }
         }
 
@@ -135,28 +136,34 @@ namespace RedeevEditor.DungeonCreator
             }
         }
 
+        public float DetectScale()
+        {
+            if (SceneData.prefabs.Count > 0)
+            {
+                return GetBounds(SceneData.prefabs[0].gameObject).size.x;
+            }
+            return 1f;
+        }
+
         #endregion
 
         #region Rooms
 
-        public void CreateRoom(Room prefab, Vector3 position, bool checkBound = true)
+        public void CreateRoom(Room prefab, Vector3 position)
         {
-            CreateRoom(prefab, SceneData.activeBlock, position, checkBound);
+            CreateRoom(prefab, SceneData.activeBlock, position);
         }
 
-        public void CreateRoom(Room prefab, DungeonBlock block, Vector3 position, bool checkBound = true)
+        public void CreateRoom(Room prefab, DungeonBlock block, Vector3 position)
         {
             if (block == null || prefab == null) return;
 
             Room instance = PrefabUtility.InstantiatePrefab(prefab) as Room;
-            instance.transform.localScale = SceneData.scaleRoom ? prefab.transform.localScale * block.matrix.scale : prefab.transform.localScale;
             instance.transform.position = position;
-            if (checkBound)
-            {
-                Vector3 center = GetBoundCenter(instance.gameObject);
-                if (center != position) instance.transform.position += (position - center);
-                instance.boundCenter = GetBoundCenter(instance.gameObject);
-            }
+            Vector3 center = GetBoundCenter(instance.gameObject);
+            if (center != position) instance.transform.position += (position - center);
+            instance.boundCenter = GetBoundCenter(instance.gameObject);
+
             instance.transform.rotation = prefab.transform.rotation;
             instance.transform.SetParent(block.transform);
             instance.name = prefab.name;
@@ -245,8 +252,6 @@ namespace RedeevEditor.DungeonCreator
                         }
                     }
 
-                    GUI.enabled = block.isActive && SceneData.isEditing;
-
                     string oldName = block.name;
                     block.name = EditorGUILayout.TextField(block.name);
                     if (string.IsNullOrEmpty(block.name)) block.name = oldName;
@@ -311,8 +316,14 @@ namespace RedeevEditor.DungeonCreator
             gridFoldout = GUILayout.Toggle(gridFoldout, "Options", EditorStyles.foldout);
             if (gridFoldout)
             {
-                SceneData.checkConnections = EditorGUILayout.Toggle("Filter by Connections", SceneData.checkConnections);
-                SceneData.scaleRoom = EditorGUILayout.Toggle("Scale Room", SceneData.scaleRoom);
+                EditorGUILayout.BeginHorizontal();
+                SceneData.scale = EditorGUILayout.FloatField("Scale", SceneData.scale);
+                if (GUILayout.Button("Detect Scale"))
+                {
+                    SceneData.scale = DetectScale();
+                }
+                EditorGUILayout.EndHorizontal();
+                SceneData.checkConnections = EditorGUILayout.Toggle("Filter by Connections", SceneData.checkConnections);              
                 SceneData.useGrid = EditorGUILayout.Toggle("Show Grid", SceneData.useGrid);
                 if (SceneData.useGrid) SceneData.gridSize = Mathf.Max(0, EditorGUILayout.IntSlider("Grid Size", SceneData.gridSize, 2, 100));
                 SceneData.boundsSource = (BoundsSource)EditorGUILayout.EnumPopup("Bounds Source", SceneData.boundsSource);
@@ -328,34 +339,34 @@ namespace RedeevEditor.DungeonCreator
             if (placeholdersFoldout)
             {
                 if (SceneData.isEditing) GUI.enabled = false;
-                if (SceneData.placeholders.Count == 0)
+                if (SceneData.prefabs.Count == 0)
                 {
                     EditorGUILayout.LabelField("Add or drag a room here", EditorStyles.centeredGreyMiniLabel, GUILayout.Height(20f));
                 }
                 else EditorGUILayout.Space();
 
-                for (int i = 0; i < SceneData.placeholders.Count; i++)
+                for (int i = 0; i < SceneData.prefabs.Count; i++)
                 {
                     EditorGUILayout.BeginHorizontal();
 
                     if (SceneData.isEditing)
                     {
-                        if (!Rooms.Contains(SceneData.placeholders[i]))
+                        if (!Rooms.Contains(SceneData.prefabs[i]))
                         {
                             GUI.backgroundColor = Color.red;
                         }
-                        else if (SceneData.selectedRoom && PrefabUtility.GetCorrespondingObjectFromSource(SceneData.selectedRoom) == SceneData.placeholders[i])
+                        else if (SceneData.selectedRoom && PrefabUtility.GetCorrespondingObjectFromSource(SceneData.selectedRoom) == SceneData.prefabs[i])
                         {
                             EditorGUILayout.LabelField(EditorGUIUtility.IconContent("d_Favorite Icon"), GUILayout.Width(20f));
                             GUI.backgroundColor = Color.green;
                         }
                     }
 
-                    SceneData.placeholders[i] = EditorGUILayout.ObjectField("", SceneData.placeholders[i], typeof(Room), false) as Room;
+                    SceneData.prefabs[i] = EditorGUILayout.ObjectField("", SceneData.prefabs[i], typeof(Room), false) as Room;
                     GUI.backgroundColor = Color.white;
                     if (EditorUtilityGUI.IconButton("d_TreeEditor.Trash", 25f, 20f))
                     {
-                        SceneData.placeholders.RemoveAt(i);
+                        SceneData.prefabs.RemoveAt(i);
                         EditorGUILayout.EndHorizontal();
                         break;
                     }
@@ -363,7 +374,7 @@ namespace RedeevEditor.DungeonCreator
                 }
                 if (GUILayout.Button(EditorGUIUtility.IconContent("Add-Available")))
                 {
-                    SceneData.placeholders.Add(new());
+                    SceneData.prefabs.Add(new());
                 }
                 GUI.enabled = true;
             }
@@ -373,7 +384,7 @@ namespace RedeevEditor.DungeonCreator
             {
                 if (obj is GameObject go && go.TryGetComponent(out Room room))
                 {
-                    if (!SceneData.placeholders.Contains(room)) SceneData.placeholders.Add(room);
+                    if (!SceneData.prefabs.Contains(room)) SceneData.prefabs.Add(room);
                 }
             });
         }
@@ -441,7 +452,7 @@ namespace RedeevEditor.DungeonCreator
                 Vector3 worldPoint = GetMouseWorldPoint(evt);
                 if (SceneData.checkConnections)
                 {
-                    rooms = GetRoomsFilterByConnection(SceneData.placeholders, worldPoint);
+                    rooms = GetRoomsFilterByConnection(SceneData.prefabs, worldPoint);
                     Repaint();
                 }
 
@@ -564,7 +575,9 @@ namespace RedeevEditor.DungeonCreator
 
             if (!string.IsNullOrEmpty(path))
             {
+                if (File.Exists(path)) AssetDatabase.DeleteAsset(path);
                 AssetDatabase.CreateAsset(data, path);
+                AssetDatabase.Refresh();
             }
         }
 
@@ -577,8 +590,8 @@ namespace RedeevEditor.DungeonCreator
 
             foreach (var element in SceneData.blockData.matrix.elements)
             {
-                Room prefab = SceneData.placeholders.Find(x => x.connectionType == element.connections);
-                if (prefab) CreateRoom(prefab, block, block.matrix.GetCenter(element), false);
+                Room prefab = SceneData.prefabs.Find(x => x.connectionType == element.connections);
+                if (prefab) CreateRoom(prefab, block, block.matrix.GetCenter(element));
                 else Debug.LogError("Room is missing");
             }
 

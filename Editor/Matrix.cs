@@ -100,11 +100,11 @@ namespace RedeevEditor.DungeonCreator
         {
             return new((i + 0.5f) * scale, 0f, (j + 0.5f) * scale);
         }
+
         public Vector3 GetCenter(Element element)
         {
             return GetCenter(element.i, element.j);
         }
-
 
         public Direction GetRequiredDirections(Vector3 point)
         {

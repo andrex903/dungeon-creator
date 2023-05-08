@@ -7,7 +7,7 @@ namespace RedeevEditor.DungeonCreator
 {
     public class DungeonCreatorSceneData : MonoBehaviour
     {
-        public Room selectedRoom;      
+        public Room selectedRoom;
         public bool useRooms = false;
 
         public BlockData blockData;
@@ -15,15 +15,14 @@ namespace RedeevEditor.DungeonCreator
         public DungeonBlock activeBlock = null;
 
         public bool checkConnections = true;
-        public bool scaleRoom = false;
+        public float scale = 1f;
         public int gridSize = 6;
         public bool useGrid = true;
 
         public BoundsSource boundsSource = BoundsSource.FirstChild;
         public string customChildName = "";
 
-        public List<Room> placeholders = new();
-        public List<Room> rooms = new();
+        public List<Room> prefabs = new();      
         public int prefabIndex = 0;
 
         [NonSerialized]

@@ -483,7 +483,7 @@ namespace RedeevEditor.DungeonCreator
             int currentIndex = Rooms.IndexOf(PrefabUtility.GetCorrespondingObjectFromSource(SceneData.selectedRoom));
             PrefabIndex = currentIndex + amount;
 
-            Vector3 position = SceneData.selectedRoom.transform.position;
+            Vector3 position = SceneData.selectedRoom.boundCenter;
             DeleteSelected();
             CreateRoom(GetRoom(), position);
         }

@@ -130,7 +130,7 @@ namespace RedeevEditor.DungeonCreator
             if (SceneView.lastActiveSceneView != null)
             {
                 SceneView.lastActiveSceneView.pivot = point;
-                SceneView.lastActiveSceneView.size = 6;
+                SceneView.lastActiveSceneView.size = SceneData.activeBlock != null ? Mathf.Max(6, SceneData.activeBlock.matrix.scale) : 6;
                 SceneView.lastActiveSceneView.Repaint();
             }
         }

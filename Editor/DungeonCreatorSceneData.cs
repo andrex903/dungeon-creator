@@ -39,7 +39,7 @@ namespace RedeevEditor.DungeonCreator
             {
                 Color old = Gizmos.color;
                 Gizmos.color = new(1f, 0.6f, 0f, 0.6f);
-                Gizmos.DrawCube(selectedRoom.transform.position, activeBlock.matrix.scale * Vector3.one);
+                Gizmos.DrawCube(activeBlock.matrix.GetCenter(selectedRoom.transform.position), activeBlock.matrix.scale * Vector3.one);
                 Gizmos.color = old;
             }
         }

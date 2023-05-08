@@ -14,10 +14,10 @@ namespace RedeevEditor.DungeonCreator
         public List<DungeonBlock> blocks = new();
         public DungeonBlock activeBlock = null;
 
-        public bool useGrid = false;
-        public int gridSize = 2;
-        public bool checkConnections = false;
-        public bool scaleRoom = true;
+        public bool checkConnections = true;
+        public bool scaleRoom = false;
+        public int gridSize = 6;
+        public bool useGrid = true;
 
         public BoundsSource boundsSource = BoundsSource.FirstChild;
         public string customChildName = "";

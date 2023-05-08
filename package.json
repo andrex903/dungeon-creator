@@ -1,0 +1,16 @@
+{
+  "name": "com.redeev.dungeon-creator",
+  "displayName": "Dungeon Creator",
+  "version": "1.0.0",
+  "unity": "2021.3",
+  "dependencies": {
+    "com.redeev.utilities": "1.0.1"
+  },
+  "keywords": [
+    "Dungeon",
+    "Creator"
+  ],
+  "category": "tools",
+  "description": "A tool for create modula dungeons",
+  "type": "tool"
+}

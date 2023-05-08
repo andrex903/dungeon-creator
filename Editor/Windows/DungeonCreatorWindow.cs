@@ -153,8 +153,8 @@ namespace RedeevEditor.DungeonCreator
             instance.transform.position = position;
             if (checkBound)
             {
-                Vector3 center = GetBoundCenter(instance.gameObject);
-                if (center != position) instance.transform.position += (position - center);
+                instance.boundCenter = GetBoundCenter(instance.gameObject);
+                if (instance.boundCenter != position) instance.transform.position += (position - instance.boundCenter);
             }
             instance.transform.rotation = prefab.transform.rotation;
             instance.transform.SetParent(block.transform);
@@ -250,8 +250,8 @@ namespace RedeevEditor.DungeonCreator
                     block.name = EditorGUILayout.TextField(block.name);
                     if (string.IsNullOrEmpty(block.name)) block.name = oldName;
                     else if (oldName != block.name) block.transform.name = block.name;
-                   
-                    block.matrix.scale = EditorGUILayout.FloatField(block.matrix.scale, GUILayout.Width(30f));                    
+
+                    block.matrix.scale = EditorGUILayout.FloatField(block.matrix.scale, GUILayout.Width(30f));
 
                     GUI.enabled = block.isActive;
 
@@ -577,7 +577,7 @@ namespace RedeevEditor.DungeonCreator
             foreach (var element in SceneData.blockData.matrix.elements)
             {
                 Room prefab = SceneData.placeholders.Find(x => x.connectionType == element.connections);
-                if (prefab) CreateRoom(prefab, block, block.matrix.GetCenter(element.i, element.j), false);
+                if (prefab) CreateRoom(prefab, block, block.matrix.GetCenter(element), false);
                 else Debug.LogError("Room is missing");
             }
 
@@ -592,7 +592,7 @@ namespace RedeevEditor.DungeonCreator
     {
         public string name = "New Block";
         public bool isActive = false;
-        public Transform transform;       
+        public Transform transform;
         public Matrix matrix;
         public List<Room> rooms = new();
 

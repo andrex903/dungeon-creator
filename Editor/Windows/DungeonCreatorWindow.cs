@@ -251,8 +251,8 @@ namespace RedeevEditor.DungeonCreator
                     block.name = EditorGUILayout.TextField(block.name);
                     if (string.IsNullOrEmpty(block.name)) block.name = oldName;
                     else if (oldName != block.name) block.transform.name = block.name;
-                   
-                    block.matrix.scale = EditorGUILayout.FloatField(block.matrix.scale, GUILayout.Width(30f));                    
+
+                    block.matrix.scale = EditorGUILayout.FloatField(block.matrix.scale, GUILayout.Width(30f));
 
                     GUI.enabled = block.isActive;
 
@@ -593,7 +593,7 @@ namespace RedeevEditor.DungeonCreator
     {
         public string name = "New Block";
         public bool isActive = false;
-        public Transform transform;       
+        public Transform transform;
         public Matrix matrix;
         public List<Room> rooms = new();
 
@@ -634,7 +634,7 @@ namespace RedeevEditor.DungeonCreator
         {
             room = null;
             int index = matrix.IndexOf(point);
-            if (index >= 0)
+            if (index >= 0 && index < rooms.Count)
             {
                 room = rooms[index];
                 return true;

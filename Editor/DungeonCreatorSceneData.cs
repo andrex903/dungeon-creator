@@ -11,11 +11,13 @@ namespace RedeevEditor.DungeonCreator
         public bool useRooms = false;
 
         public BlockData blockData;
-        public List<DungeonBlock> blocks = new();     
+        public List<DungeonBlock> blocks = new();
+        public DungeonBlock activeBlock = null;
 
         public bool useGrid = false;
         public int gridSize = 2;
         public bool checkConnections = false;
+        public bool scaleRoom = true;
 
         public BoundsSource boundsSource = BoundsSource.FirstChild;
         public string customChildName = "";
@@ -29,15 +31,15 @@ namespace RedeevEditor.DungeonCreator
 
         private void OnDrawGizmos()
         {
-            if (useGrid) DrawGrid(gridSize, 1f);
+            if (!isEditing || activeBlock == null) return;
 
-            if (!isEditing) return;
+            if (useGrid && isEditing) DrawGrid(gridSize, activeBlock.matrix.scale);
 
             if (selectedRoom)
             {
                 Color old = Gizmos.color;
                 Gizmos.color = new(1f, 0.6f, 0f, 0.6f);
-                Gizmos.DrawCube(selectedRoom.transform.position, GetActiveBlock().scale * Vector3.one);
+                Gizmos.DrawCube(selectedRoom.transform.position, activeBlock.matrix.scale * Vector3.one);
                 Gizmos.color = old;
             }
         }
@@ -85,25 +87,18 @@ namespace RedeevEditor.DungeonCreator
 
         #region Blocks
 
-        public void ActivateBlock(DungeonBlock group)
+        public void ActivateBlock(DungeonBlock block)
         {
             DeactivateAllBlocks();
-            group.Activate();
+            block.Activate();
+            activeBlock = block;
         }
 
         public void DeactivateAllBlocks()
         {
             foreach (var block in blocks) block.Deactivate();
             selectedRoom = null;
-        }
-
-        public DungeonBlock GetActiveBlock()
-        {
-            for (int i = 0; i < blocks.Count; i++)
-            {
-                if (blocks[i].isActive) return blocks[i];
-            }
-            return null;
+            activeBlock = null;
         }
 
         public DungeonBlock CreateNewBlock(string name)

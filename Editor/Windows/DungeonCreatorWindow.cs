@@ -13,7 +13,6 @@ namespace RedeevEditor.DungeonCreator
         private int controlID;
 
         private DungeonBlock lastBlock;
-        private DungeonBlock ActiveBlock => SceneData.GetActiveBlock();
 
         private bool blocksFoldout = true;
         private bool gridFoldout = true;
@@ -89,12 +88,12 @@ namespace RedeevEditor.DungeonCreator
         {
             SceneData.isEditing = true;
 
-            if (ActiveBlock == null) return;
+            if (SceneData.activeBlock == null) return;
 
             Selection.objects = new UnityEngine.Object[0];
             Tools.hidden = true;
 
-            CenterOnGroup(ActiveBlock);
+            CenterOnGroup(SceneData.activeBlock);
         }
 
         public void StopEdit()
@@ -142,7 +141,7 @@ namespace RedeevEditor.DungeonCreator
 
         public void CreateRoom(Room prefab, Vector3 position, bool checkBound = true)
         {
-            CreateRoom(prefab, ActiveBlock, position, checkBound);
+            CreateRoom(prefab, SceneData.activeBlock, position, checkBound);
         }
 
         public void CreateRoom(Room prefab, DungeonBlock block, Vector3 position, bool checkBound = true)
@@ -150,7 +149,7 @@ namespace RedeevEditor.DungeonCreator
             if (block == null || prefab == null) return;
 
             Room instance = PrefabUtility.InstantiatePrefab(prefab) as Room;
-            instance.transform.localScale = Vector3.one * block.scale;
+            instance.transform.localScale = SceneData.scaleRoom ? prefab.transform.localScale * block.matrix.scale : prefab.transform.localScale;
             instance.transform.position = position;
             if (checkBound)
             {
@@ -175,8 +174,8 @@ namespace RedeevEditor.DungeonCreator
         private List<Room> GetRoomsFilterByConnection(List<Room> original, Vector3 worldPoint)
         {
             List<Room> filtered = new();
-            Direction forbidden = ActiveBlock.matrix.GetForbiddenDirections(worldPoint);
-            Direction required = ActiveBlock.matrix.GetRequiredDirections(worldPoint);
+            Direction forbidden = SceneData.activeBlock.matrix.GetForbiddenDirections(worldPoint);
+            Direction required = SceneData.activeBlock.matrix.GetRequiredDirections(worldPoint);
 
             for (int i = 0; i < original.Count; i++)
             {
@@ -188,9 +187,9 @@ namespace RedeevEditor.DungeonCreator
 
         public void Delete(Room room)
         {
-            if (ActiveBlock == null) return;
+            if (SceneData.activeBlock == null) return;
 
-            ActiveBlock.RemoveRoom(room);
+            SceneData.activeBlock.RemoveRoom(room);
             if (SceneData.selectedRoom == room.gameObject) Deselect();
             DestroyImmediate(room.gameObject);
 
@@ -251,8 +250,8 @@ namespace RedeevEditor.DungeonCreator
                     block.name = EditorGUILayout.TextField(block.name);
                     if (string.IsNullOrEmpty(block.name)) block.name = oldName;
                     else if (oldName != block.name) block.transform.name = block.name;
-
-                    block.scale = EditorGUILayout.FloatField(block.scale, GUILayout.Width(30f));
+                   
+                    block.matrix.scale = EditorGUILayout.FloatField(block.matrix.scale, GUILayout.Width(30f));                    
 
                     GUI.enabled = block.isActive;
 
@@ -312,6 +311,7 @@ namespace RedeevEditor.DungeonCreator
             if (gridFoldout)
             {
                 SceneData.checkConnections = EditorGUILayout.Toggle("Filter by Connections", SceneData.checkConnections);
+                SceneData.scaleRoom = EditorGUILayout.Toggle("Scale Room", SceneData.scaleRoom);
                 SceneData.useGrid = EditorGUILayout.Toggle("Show Grid", SceneData.useGrid);
                 if (SceneData.useGrid) SceneData.gridSize = Mathf.Max(0, EditorGUILayout.IntSlider("Grid Size", SceneData.gridSize, 2, 100));
                 SceneData.boundsSource = (BoundsSource)EditorGUILayout.EnumPopup("Bounds Source", SceneData.boundsSource);
@@ -444,14 +444,14 @@ namespace RedeevEditor.DungeonCreator
                     Repaint();
                 }
 
-                if (ActiveBlock.TryGetRoom(worldPoint, out Room room))
+                if (SceneData.activeBlock.TryGetRoom(worldPoint, out Room room))
                 {
                     Select(room);
                     evt.Use();
                 }
                 else
                 {
-                    CreateRoom(GetRoom(), ActiveBlock.matrix.GetCenter(worldPoint));
+                    CreateRoom(GetRoom(), SceneData.activeBlock.matrix.GetCenter(worldPoint));
                     evt.Use();
                 }
             }
@@ -572,7 +572,7 @@ namespace RedeevEditor.DungeonCreator
             if (SceneData.blockData == null) return;
 
             DungeonBlock block = SceneData.CreateNewBlock(SceneData.blockData.name);
-            block.scale = SceneData.blockData.matrix.scale;
+            block.matrix.scale = SceneData.blockData.matrix.scale;
 
             foreach (var element in SceneData.blockData.matrix.elements)
             {
@@ -592,10 +592,14 @@ namespace RedeevEditor.DungeonCreator
     {
         public string name = "New Block";
         public bool isActive = false;
-        public Transform transform;
-        public float scale = 1f;
-        public Matrix matrix = new(1f);
+        public Transform transform;       
+        public Matrix matrix;
         public List<Room> rooms = new();
+
+        public DungeonBlock()
+        {
+            matrix = new(1f);
+        }
 
         public void Activate()
         {

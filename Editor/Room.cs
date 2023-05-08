@@ -6,6 +6,6 @@ namespace RedeevEditor.DungeonCreator
     {
         public Vector3 boundCenter;
         [EnumFlags]
-        public Direction connectionType;             
+        public Direction connections;             
     }
 }

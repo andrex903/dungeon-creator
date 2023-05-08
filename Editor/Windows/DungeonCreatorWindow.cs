@@ -187,7 +187,7 @@ namespace RedeevEditor.DungeonCreator
 
             for (int i = 0; i < original.Count; i++)
             {
-                if (original[i].connectionType.NotContains(forbidden) && original[i].connectionType.Has(required)) filtered.Add(original[i]);
+                if (original[i].connections.NotContains(forbidden) && original[i].connections.Has(required)) filtered.Add(original[i]);
             }
 
             return filtered;
@@ -211,7 +211,7 @@ namespace RedeevEditor.DungeonCreator
         {
             EditorGUI.BeginChangeCheck();
 
-            PlaceholdersGUI();
+            PrefabsGUI();
             BlocksGUI();
             OptionsGUI();
             ImportGUI();
@@ -235,6 +235,7 @@ namespace RedeevEditor.DungeonCreator
                     block.isActive = EditorGUILayout.Toggle(block.isActive, GUILayout.Width(15f));
                     if (block.isActive)
                     {
+                        block.matrix.scale = SceneData.scale;
                         if (block != lastBlock)
                         {
                             lastBlock = block;
@@ -256,8 +257,6 @@ namespace RedeevEditor.DungeonCreator
                     block.name = EditorGUILayout.TextField(block.name);
                     if (string.IsNullOrEmpty(block.name)) block.name = oldName;
                     else if (oldName != block.name) block.transform.name = block.name;
-
-                    block.matrix.scale = EditorGUILayout.FloatField(block.matrix.scale, GUILayout.Width(30f));
 
                     GUI.enabled = block.isActive;
 
@@ -316,14 +315,7 @@ namespace RedeevEditor.DungeonCreator
             gridFoldout = GUILayout.Toggle(gridFoldout, "Options", EditorStyles.foldout);
             if (gridFoldout)
             {
-                EditorGUILayout.BeginHorizontal();
-                SceneData.scale = EditorGUILayout.FloatField("Scale", SceneData.scale);
-                if (GUILayout.Button("Detect Scale"))
-                {
-                    SceneData.scale = DetectScale();
-                }
-                EditorGUILayout.EndHorizontal();
-                SceneData.checkConnections = EditorGUILayout.Toggle("Filter by Connections", SceneData.checkConnections);              
+                SceneData.checkConnections = EditorGUILayout.Toggle("Filter by Connections", SceneData.checkConnections);
                 SceneData.useGrid = EditorGUILayout.Toggle("Show Grid", SceneData.useGrid);
                 if (SceneData.useGrid) SceneData.gridSize = Mathf.Max(0, EditorGUILayout.IntSlider("Grid Size", SceneData.gridSize, 2, 100));
                 SceneData.boundsSource = (BoundsSource)EditorGUILayout.EnumPopup("Bounds Source", SceneData.boundsSource);
@@ -332,10 +324,10 @@ namespace RedeevEditor.DungeonCreator
             EditorGUILayout.EndVertical();
         }
 
-        private void PlaceholdersGUI()
+        private void PrefabsGUI()
         {
             Rect rect = EditorGUILayout.BeginVertical("HelpBox");
-            placeholdersFoldout = GUILayout.Toggle(placeholdersFoldout, "Rooms", EditorStyles.foldout);
+            placeholdersFoldout = GUILayout.Toggle(placeholdersFoldout, "Prefabs", EditorStyles.foldout);
             if (placeholdersFoldout)
             {
                 if (SceneData.isEditing) GUI.enabled = false;
@@ -372,9 +364,11 @@ namespace RedeevEditor.DungeonCreator
                     }
                     EditorGUILayout.EndHorizontal();
                 }
-                if (GUILayout.Button(EditorGUIUtility.IconContent("Add-Available")))
+                EditorGUILayout.Space();
+                SceneData.scale = EditorGUILayout.FloatField("Scale", SceneData.scale);               
+                if (GUILayout.Button("Clear"))
                 {
-                    SceneData.prefabs.Add(new());
+                    SceneData.prefabs.Clear();
                 }
                 GUI.enabled = true;
             }
@@ -384,7 +378,11 @@ namespace RedeevEditor.DungeonCreator
             {
                 if (obj is GameObject go && go.TryGetComponent(out Room room))
                 {
-                    if (!SceneData.prefabs.Contains(room)) SceneData.prefabs.Add(room);
+                    if (!SceneData.prefabs.Contains(room))
+                    {
+                        SceneData.prefabs.Add(room);
+                        SceneData.scale = DetectScale();
+                    }
                 }
             });
         }
@@ -586,11 +584,11 @@ namespace RedeevEditor.DungeonCreator
             if (SceneData.blockData == null) return;
 
             DungeonBlock block = SceneData.CreateNewBlock(SceneData.blockData.name);
-            block.matrix.scale = SceneData.blockData.matrix.scale;
+            block.matrix.scale = SceneData.scale;
 
             foreach (var element in SceneData.blockData.matrix.elements)
             {
-                Room prefab = SceneData.prefabs.Find(x => x.connectionType == element.connections);
+                Room prefab = SceneData.prefabs.Find(x => x.connections == element.connections);
                 if (prefab) CreateRoom(prefab, block, block.matrix.GetCenter(element));
                 else Debug.LogError("Room is missing");
             }
@@ -629,7 +627,7 @@ namespace RedeevEditor.DungeonCreator
 
         public void AddRoom(Room room, Vector3 position)
         {
-            Element element = new() { connections = room.connectionType };
+            Element element = new() { connections = room.connections };
             matrix.Add(element, position);
             rooms.Add(room);
         }

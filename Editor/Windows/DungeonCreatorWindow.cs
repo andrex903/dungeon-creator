@@ -623,7 +623,7 @@ namespace RedeevEditor.DungeonCreator
 
         public void RemoveRoom(Room room)
         {
-            if (matrix.TryGet(room.transform.position, out var element))
+            if (matrix.TryGet(room.boundCenter, out var element))
             {
                 matrix.Remove(element);
             }

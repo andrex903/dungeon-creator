@@ -20,6 +20,8 @@ namespace RedeevEditor.DungeonCreator
         private bool autoGenerationFoldout = true;
         private bool importExportFoldout = true;
         private bool placeholdersFoldout = true;
+       
+        private Vector2 scrollPos;
 
         private List<Room> rooms = new();
         private List<Room> Rooms
@@ -209,6 +211,7 @@ namespace RedeevEditor.DungeonCreator
 
         private void OnGUI()
         {
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
             EditorGUI.BeginChangeCheck();
 
             PrefabsGUI();
@@ -218,6 +221,7 @@ namespace RedeevEditor.DungeonCreator
             //AutoGenerationGUI();
 
             if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(SceneData);
+            EditorGUILayout.EndScrollView();
         }
 
         private void BlocksGUI()
@@ -315,6 +319,7 @@ namespace RedeevEditor.DungeonCreator
             gridFoldout = GUILayout.Toggle(gridFoldout, "Options", EditorStyles.foldout);
             if (gridFoldout)
             {
+                SceneData.randomize = EditorGUILayout.Toggle("Randomize Rooms", SceneData.randomize);
                 SceneData.checkConnections = EditorGUILayout.Toggle("Filter by Connections", SceneData.checkConnections);
                 SceneData.useGrid = EditorGUILayout.Toggle("Show Grid", SceneData.useGrid);
                 if (SceneData.useGrid) SceneData.gridSize = Mathf.Max(0, EditorGUILayout.IntSlider("Grid Size", SceneData.gridSize, 2, 100));
@@ -365,7 +370,7 @@ namespace RedeevEditor.DungeonCreator
                     EditorGUILayout.EndHorizontal();
                 }
                 EditorGUILayout.Space();
-                SceneData.scale = EditorGUILayout.FloatField("Scale", SceneData.scale);               
+                SceneData.scale = EditorGUILayout.FloatField("Scale", SceneData.scale);
                 if (GUILayout.Button("Clear"))
                 {
                     SceneData.prefabs.Clear();
@@ -461,6 +466,7 @@ namespace RedeevEditor.DungeonCreator
                 }
                 else
                 {
+                    if (SceneData.randomize) PrefabIndex = UnityEngine.Random.Range(0, Rooms.Count);
                     CreateRoom(GetRoom(), SceneData.activeBlock.matrix.GetCenter(worldPoint));
                     evt.Use();
                 }

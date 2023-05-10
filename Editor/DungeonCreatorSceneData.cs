@@ -18,6 +18,7 @@ namespace RedeevEditor.DungeonCreator
         public float scale = 1f;
         public int gridSize = 6;
         public bool useGrid = true;
+        public bool randomize = false;
 
         public BoundsSource boundsSource = BoundsSource.FirstChild;
         public string customChildName = "";

@@ -206,7 +206,7 @@ namespace RedeevEditor.DungeonCreator
                 if (prefabs.Count == 0) continue;
 
                 Room prefab = prefabs[UnityEngine.Random.Range(0, prefabs.Count)];
-                Vector3 position = block.matrix.GetCenter(room.transform.position);
+                Vector3 position = room.boundCenter;
                 Delete(room);
                 CreateRoom(prefab, block, position);
             }

@@ -10,7 +10,7 @@ namespace RedeevEditor.DungeonCreator
         public Room selectedRoom;
         public bool useRooms = false;
 
-        public BlockData blockData;
+        public List<BlockData> blockData = new();
         public List<DungeonBlock> blocks = new();
         public DungeonBlock activeBlock = null;
 

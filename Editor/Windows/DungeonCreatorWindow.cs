@@ -94,7 +94,7 @@ namespace RedeevEditor.DungeonCreator
 
         public void StopEdit()
         {
-            SceneData.isEditing = false;
+            if (SceneData) SceneData.isEditing = false;
 
             Tools.hidden = false;
         }
@@ -308,7 +308,7 @@ namespace RedeevEditor.DungeonCreator
                     if (EditorUtilityGUI.IconButton("d_Grid.MoveTool", 25f, 20f, tooltip: "Focus group"))
                     {
                         if (block.transform) CenterOnGroup(block);
-                    }                  
+                    }
 
                     if (EditorUtilityGUI.IconButton("d_SaveAs", 25f, 20f, tooltip: "Save group"))
                     {

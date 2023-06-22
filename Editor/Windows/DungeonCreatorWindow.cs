@@ -353,6 +353,7 @@ namespace RedeevEditor.DungeonCreator
                 SceneData.checkConnections = EditorGUILayout.Toggle("Filter by Connections", SceneData.checkConnections);
                 SceneData.useGrid = EditorGUILayout.Toggle("Show Grid", SceneData.useGrid);
                 if (SceneData.useGrid) SceneData.gridSize = Mathf.Max(0, EditorGUILayout.IntSlider("Grid Size", SceneData.gridSize, 2, 100));
+                SceneData.selectionColor = EditorGUILayout.ColorField("Selection Color", SceneData.selectionColor);
             }
             EditorGUILayout.EndVertical();
         }

@@ -20,6 +20,8 @@ namespace RedeevEditor.DungeonCreator
         public bool useGrid = true;
         public bool randomize = false;
 
+        public Color selectionColor = new(1f, 0.6f, 0f, 0.6f);
+
         public BoundsSource boundsSource = BoundsSource.FirstChild;
         public string customChildName = "";
 
@@ -38,7 +40,7 @@ namespace RedeevEditor.DungeonCreator
             if (selectedRoom != null)
             {
                 Color old = Gizmos.color;
-                Gizmos.color = new(1f, 0.6f, 0f, 0.6f);
+                Gizmos.color = selectionColor;
                 Gizmos.DrawCube(selectedRoom.boundCenter, activeBlock.matrix.scale * Vector3.one);
                 Gizmos.color = old;
             }

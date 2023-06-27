@@ -332,6 +332,17 @@ namespace RedeevEditor.DungeonCreator
                 {
                     SceneData.CreateNewBlock($"Block{SceneData.blocks.Count}");
                 }
+                if (GUILayout.Button("Clear"))
+                {
+                    if (EditorUtility.DisplayDialog("Warning", "Are you sure to delete all the blocks?", "Confirm", "Cancel"))
+                    {
+                        StopEdit();
+                        for (int i = SceneData.blocks.Count - 1; i >= 0; i--)
+                        {
+                            SceneData.RemoveBlock(SceneData.blocks[i]);
+                        }
+                    }
+                }
             }
             EditorGUILayout.EndVertical();
         }

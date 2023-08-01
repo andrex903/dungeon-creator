@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 
 namespace RedeevEditor.DungeonCreator
@@ -7,6 +8,7 @@ namespace RedeevEditor.DungeonCreator
         [HideInInspector]
         public Vector3 boundCenter;
         [EnumFlags]
-        public Direction connections;             
+        public Direction connections;
     }
 }
+#endif

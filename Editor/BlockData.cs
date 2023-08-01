@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 
 namespace RedeevEditor.DungeonCreator
@@ -7,3 +8,4 @@ namespace RedeevEditor.DungeonCreator
         public Matrix matrix;
     }
 }
+#endif
